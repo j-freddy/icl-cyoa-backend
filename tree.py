@@ -22,10 +22,15 @@ class GamebookTree:
         for node_data in node_data_list:
             self.node_lookup[node_data.node_id] = node_data
 
-    def to_nodes_json_list(self):
+    def from_nodes_dict_list(node_data_dict_list):
+        node_data_list = [GamebookNodeData.from_dict(node_data) for node_data in node_data_dict_list]
+
+        return GamebookTree(node_data_list)
+
+    def to_nodes_dict_list(self):
         return [node_data.to_dict() for node_data in self.node_lookup.values()]
 
-    def get_text_up_to_node(end_node_id):
+    def get_text_up_to_node(self, end_node_id):
         rev_text = []
         node_id = self.node_lookup[end_node_id].parent_id
 
@@ -39,5 +44,3 @@ class GamebookTree:
             node_id = node.parent_id
 
         return "".join(reversed(rev_text))
-
-

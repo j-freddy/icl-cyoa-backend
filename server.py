@@ -1,4 +1,4 @@
-from tree import GamebookTree, GamebookNodeData
+from backend.tree import GamebookTree, GamebookNodeData
 from dataclasses import asdict
 
 import tornado
@@ -35,13 +35,11 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         if req_type == "expandNode":
             data = msg["data"]
 
-            node_data_list = [GamebookNodeData.from_dict(node_data) for node_data in data["nodes"]]
+            graph = GamebookTree.from_nodes_dict_list(data["nodes"])
             node_to_expand = data["nodeToExpand"]
 
-            graph = GamebookTree(node_data_list)
-
             # example serialization
-            self.write_message(json.dumps({"nodes": graph.to_nodes_json_list()}))
+            self.write_message(json.dumps({"nodes": graph.to_nodes_dict_list()}))
 
             # TODO: need to generate and send back a graph with expanded node - using text_generator
         else:
