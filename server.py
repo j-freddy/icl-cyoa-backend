@@ -35,14 +35,13 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         if req_type == "expandNode":
             data = msg["data"]
 
-            adjacency_lists = data["graph"]["adjacencyLists"]
-            node_data_list = [GamebookNodeData(node_data["action"], node_data["paragraph"]) for node_data in data["graph"]["nodes"]]
+            node_data_list = [GamebookNodeData.from_dict(node_data) for node_data in data["nodes"]]
             node_to_expand = data["nodeToExpand"]
 
-            graph = GamebookTree(adjacency_lists, node_data_list)
+            graph = GamebookTree(node_data_list)
 
             # example serialization
-            self.write_message(json.dumps(graph.to_dict()))
+            self.write_message(json.dumps({"nodes": graph.to_nodes_json_list()}))
 
             # TODO: need to generate and send back a graph with expanded node - using text_generator
         else:

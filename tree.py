@@ -1,16 +1,43 @@
 from dataclasses import dataclass, asdict
+from dataclasses_json import dataclass_json, LetterCase
+from typing import List, Optional
 
+@dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
 class GamebookNodeData:
-    action: str
+    node_id: int
+
+    action: Optional[str]
     paragraph: str
 
-class GamebookTree:
-    """Class for representing
-    """
-    def __init__(self, adjacency_lists, node_data_list):
-        self.adjacency_lists = adjacency_lists
-        self.node_data_list = node_data_list
+    parent_id: Optional[int]
+    children_ids: List[int]
 
-    def to_dict(self):
-        return {"adjacencyLists": self.adjacency_lists, "nodes": [asdict(node_data) for node_data in self.node_data_list]}
+class GamebookTree:
+    """Class for representing the tree for a gamebook"""
+
+    def __init__(self, node_data_list: List[GamebookNodeData]):
+        self.node_lookup = {}
+
+        for node_data in node_data_list:
+            self.node_lookup[node_data.node_id] = node_data
+
+    def to_nodes_json_list(self):
+        return [node_data.to_dict() for node_data in self.node_lookup.values()]
+
+    def get_text_up_to_node(end_node_id):
+        rev_text = []
+        node_id = self.node_lookup[end_node_id].parent_id
+
+        while node_id is not None:
+            node = self.node_lookup[node_id]
+
+            rev_text.append(node.paragraph)
+            if node.action is not None:
+                rev_text.append(node.action)
+
+            node_id = node.parent_id
+
+        return "".join(reversed(rev_text))
+
+
