@@ -17,10 +17,7 @@ class GamebookTree:
     """Class for representing the tree for a gamebook"""
 
     def __init__(self, node_data_list: List[GamebookNodeData]):
-        self.node_lookup = {}
-
-        for node_data in node_data_list:
-            self.node_lookup[node_data.node_id] = node_data
+        self.node_lookup = {node_data.node_id: node_data for node_data in node_data_list}
 
     def from_nodes_dict_list(node_data_dict_list):
         node_data_list = [GamebookNodeData.from_dict(node_data) for node_data in node_data_dict_list]
