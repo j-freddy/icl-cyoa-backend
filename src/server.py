@@ -1,9 +1,9 @@
-from backend.tree import GamebookTree, GamebookNodeData
-from dataclasses import asdict
-
+import json
 import tornado
 import tornado.websocket
-import json
+
+from backend.src.tree import GamebookTree
+
 
 LISTEN_PORT = 8000
 LISTEN_ADDRESS = '127.0.0.1'
@@ -17,7 +17,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
             (r'/ws/(.*)', cls, {}),
         ]
 
-    def open(self, channel):
+    def open(self, channel: str):
         self.channel = channel
         print(f"websocket opened, channel: {channel}")
 

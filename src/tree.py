@@ -1,6 +1,7 @@
-from dataclasses import dataclass, asdict
-from dataclasses_json import dataclass_json, LetterCase
 from typing import List, Optional
+from dataclasses import dataclass
+
+from dataclasses_json import dataclass_json, LetterCase
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
@@ -19,6 +20,7 @@ class GamebookTree:
     def __init__(self, node_data_list: List[GamebookNodeData]):
         self.node_lookup = {node_data.node_id: node_data for node_data in node_data_list}
 
+    @staticmethod
     def from_nodes_dict_list(node_data_dict_list):
         node_data_list = [GamebookNodeData.from_dict(node_data) for node_data in node_data_dict_list]
 

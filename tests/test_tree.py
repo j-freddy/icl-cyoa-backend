@@ -1,6 +1,6 @@
 import unittest
 
-from backend.tree import GamebookNodeData, GamebookTree
+from backend.src.tree import GamebookNodeData, GamebookTree
 
 example_node_data = [
     {
