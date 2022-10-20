@@ -38,6 +38,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
             graph = GamebookTree.from_nodes_dict_list(data["nodes"])
             node_to_expand = data["nodeToExpand"]
 
+            GamebookTextGenerator(GPT3Model()).expand_graph_once(graph, node_to_expand)
             # example serialization
             self.write_message(json.dumps({"nodes": graph.to_nodes_dict_list()}))
 
