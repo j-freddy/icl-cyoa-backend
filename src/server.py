@@ -1,20 +1,24 @@
 import json
+import os
+
 import tornado
 import tornado.websocket
 
-from backend.src.tree import GamebookTree
+from src.models.gpt3 import GPT3Model
+from src.text_generator import GamebookTextGenerator
+from src.tree import GamebookTree
+
+LISTEN_PORT = os.getenv('PORT', 8000)
+LISTEN_ADDRESS = "127.0.0.1"
 
 
-LISTEN_PORT = 8000
-LISTEN_ADDRESS = '127.0.0.1'
-
-class WebSocketHandler(tornado.websocket.WebSocketHandler):
+class WebSocketHandler(tornado.websocket.WebSocketHandler):  # noqa
     """Simple WebSocket handler to serve clients."""
 
     @classmethod
     def urls(cls):
         return [
-            (r'/ws/(.*)', cls, {}),
+            (r"/ws/(.*)", cls, {}),
         ]
 
     def open(self, channel: str):
@@ -52,15 +56,17 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         """
         return True
 
-def main(): 
+
+def main():
     app = tornado.web.Application(WebSocketHandler.urls())
 
     http_server = tornado.httpserver.HTTPServer(app)
-    http_server.listen(LISTEN_PORT, LISTEN_ADDRESS)
-    
+    http_server.listen(LISTEN_PORT)
+
     # Start IO/Event loop
     tornado.ioloop.IOLoop.instance().start()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     # TODO: construct a text generator with a model
     main()

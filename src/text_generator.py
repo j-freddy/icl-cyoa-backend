@@ -2,8 +2,9 @@
 """
 
 from typing import List
-from backend.src.tree import GamebookTree
-from backend.src.models.gpt3 import GPT3Model
+from src.tree import GamebookTree
+from src.models.gpt3 import GPT3Model
+
 
 class GamebookTextGenerator:
     """Class for modifying gamebook tree, and generating new text using a model"""
@@ -11,7 +12,8 @@ class GamebookTextGenerator:
     def __init__(self, model: GPT3Model) -> None:
         self.model = model
 
-    def _option_prompt(self, num_options: int) -> str:
+    @staticmethod
+    def _option_prompt(num_options: int) -> str:
         return f"You have {num_options} options:"
 
     def _generate_actions(self, full_text: str, num_options=2) -> List[str]:
@@ -21,9 +23,9 @@ class GamebookTextGenerator:
         actions = []
         for line in generated.splitlines():
             if line != "":
-                line = line[line.find(next(filter(str.isalpha, line))):]
+                line = line[line.find(next(filter(str.isalpha, line))) :]
                 if line[-1] != ".":
-                    line = line + "."
+                    line += "."
                 actions.append(line)
         return actions
 
@@ -32,10 +34,12 @@ class GamebookTextGenerator:
         return self.model.complete(prompt)
 
     def _action_to_second_person(self, action: str) -> str:
-        return self.model.edit(text_to_edit=action,
-                              instruction="Rewrite this as 'You choose ...'")
+        return self.model.edit(
+            text_to_edit=action, instruction="Rewrite this as 'You choose ...'"
+        )
 
-    def _paragraphs_to_prompt(self, paragraph_list: str):
+    @staticmethod
+    def _paragraphs_to_prompt(paragraph_list: str):
         return " ".join(paragraph_list)
 
     def expand_graph_once(self, tree: GamebookTree, expand_at_node=0) -> None:
@@ -57,10 +61,12 @@ class GamebookTextGenerator:
             edited_action = self._action_to_second_person(end_action) + " "
 
             # then we need to generate paragraph
-            generated_paragraph = self._generate_paragraph(previous_text + " "
-                + edited_action)
-            tree.edit_node(expand_at_node,
-                paragraph =  edited_action + generated_paragraph)
+            generated_paragraph = self._generate_paragraph(
+                previous_text + " " + edited_action
+            )
+            tree.edit_node(
+                expand_at_node, paragraph=edited_action + generated_paragraph
+            )
             return
 
         # else we need to generate new actions given the current text and
