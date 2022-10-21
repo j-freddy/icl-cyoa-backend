@@ -19,14 +19,21 @@ class GamebookTextGenerator:
     def _generate_actions(self, full_text: str, num_options=2) -> List[str]:
         prompt = full_text + " " + self._option_prompt(num_options)
         generated = self.model.complete(prompt)
-        # Extract only the sentences.
+        # Extract only the actions.
         actions = []
+        count = 0
         for line in generated.splitlines():
-            if line != "":
-                line = line[line.find(next(filter(str.isalpha, line))) :]
+            line = line.strip()
+            first_alpha = next(filter(str.isalpha, line), None)
+            # Ignore non-alphabetical content at the front
+            if first_alpha is not None:
+                line = line[line.find(first_alpha):]
                 if line[-1] != ".":
                     line += "."
                 actions.append(line)
+                count += 1
+            if count >= num_options:
+                return actions
         return actions
 
     def _generate_paragraph(self, full_text: str) -> str:
