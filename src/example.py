@@ -4,7 +4,7 @@ from src.tree import GamebookTree
 
 model = GPT3Model()
 generator = GamebookTextGenerator(model)
-paragraph = (
+paragraph: str = (
     "You are a commoner living in the large kingdom of Garion. "
     "Your kingdom has been in bitter war with the neighboring kingdom, Liore, for the past year. "
     "You dream of doing something great and going on an adventure. "

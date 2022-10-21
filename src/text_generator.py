@@ -47,7 +47,7 @@ class GamebookTextGenerator:
         )
 
     @staticmethod
-    def _paragraphs_to_prompt(paragraph_list: str):
+    def _paragraphs_to_prompt(paragraph_list: List[str]) -> str:
         return " ".join(paragraph_list)
 
     def expand_graph_once(self, tree: GamebookTree, expand_at_node=0) -> None:
