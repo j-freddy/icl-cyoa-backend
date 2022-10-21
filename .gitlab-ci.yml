@@ -3,23 +3,42 @@ default:
 
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  PRE_COMMIT_HOME: "${CI_PROJECT_DIR}/.cache/pre-commit"
+
 
 cache:
   paths:
     - .cache/pip
 
 stages:
+  - pre-commit
   - test
   - deploy
 
-run-tests:
-  stage: test
-  script:
+test-pre-commit:
+  stage: pre-commit
+  before_script:
+    - apt update && apt install -y --no-install-recommends git
     - pip install virtualenv
     - virtualenv venv
     - source venv/bin/activate
     - pip install -r requirements.txt
+  script:
+    - pre-commit run --all-files
+
+
+run-tests:
+  stage: test
+  before_script:
+    - pip install virtualenv
+    - virtualenv venv
+    - source venv/bin/activate
+    - pip install -r requirements.txt
+  script:
     - python -m unittest
+  cache:
+    paths:
+      - ${PRE_COMMIT_HOME}
 
 deploy-int-stable:
   image: ruby:3.1.2-bullseye
