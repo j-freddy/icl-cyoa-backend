@@ -1,9 +1,9 @@
 """Module for the text generator.
 """
-
 from typing import List
-from src.tree import GamebookTree
+
 from src.models.gpt3 import GPT3Model
+from src.tree import GamebookTree
 
 
 class GamebookTextGenerator:
@@ -27,7 +27,7 @@ class GamebookTextGenerator:
             first_alpha = next(filter(str.isalpha, line), None)
             # Ignore non-alphabetical content at the front
             if first_alpha is not None:
-                line = line[line.find(first_alpha):]
+                line = line[line.find(first_alpha) :]
                 if line[-1] != ".":
                     line += "."
                 actions.append(line)
@@ -42,7 +42,8 @@ class GamebookTextGenerator:
 
     def _action_to_second_person(self, action: str) -> str:
         return self.model.edit(
-            text_to_edit=action, instruction="Rewrite this as 'You choose ...'"
+            text_to_edit=action,
+            instruction="Rewrite this as 'You choose ...'",
         )
 
     @staticmethod
@@ -69,10 +70,11 @@ class GamebookTextGenerator:
 
             # then we need to generate paragraph
             generated_paragraph = self._generate_paragraph(
-                previous_text + " " + edited_action
+                previous_text + " " + edited_action,
             )
             tree.edit_node(
-                expand_at_node, paragraph=edited_action + generated_paragraph
+                expand_at_node,
+                paragraph=edited_action + generated_paragraph,
             )
             return
 

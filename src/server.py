@@ -1,14 +1,13 @@
 import json
 import os
 
-import tornado
 import tornado.websocket
 
 from src.models.gpt3 import GPT3Model
 from src.text_generator import GamebookTextGenerator
 from src.tree import GamebookTree
 
-LISTEN_PORT = os.getenv('PORT', 8000)
+LISTEN_PORT = os.getenv("PORT", 8000)
 LISTEN_ADDRESS = "127.0.0.1"
 
 

@@ -1,10 +1,13 @@
 from unittest import TestCase
 from unittest.mock import Mock
 
-from src.text_generator import GamebookTextGenerator
 from src.models.gpt3 import GPT3Model
+from src.text_generator import GamebookTextGenerator
+
 
 class GamebookTextGeneratorTest(TestCase):
+    sample_text: str = ""
+    sample_response: str = ""
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -27,10 +30,12 @@ class GamebookTextGeneratorTest(TestCase):
         mock_model.edit.return_value = self.sample_response
         expected_instruction = "Rewrite this as 'You choose ...'"
         edited = generator._action_to_second_person(self.sample_text)
-        mock_model.edit.assert_called_once_with(text_to_edit=self.sample_text, 
-                instruction=expected_instruction)
+        mock_model.edit.assert_called_once_with(
+            text_to_edit=self.sample_text,
+            instruction=expected_instruction,
+        )
         self.assertEqual(self.sample_response, edited)
-    
+
     def test_option_prompt(self):
         num_options = 5
         expected_text = "You have 5 options:"
@@ -44,35 +49,29 @@ class GamebookTextGeneratorTest(TestCase):
         self.assertEqual(expected_text, actual_text)
 
     def test_generate_actions_correct_format(self):
-        mock_return = "\n" + \
-        "1) You can eat apples.\n" + \
-        "2) You can go home.\n"
+        mock_return = "\n" + "1) You can eat apples.\n" + "2) You can go home.\n"
         self._test_template_generate_actions(mock_return)
 
     def test_generate_actions_without_period(self):
-        mock_return = "\n" + \
-        "1) You can eat apples\n" + \
-        "2) You can go home\n"
+        mock_return = "\n" + "1) You can eat apples\n" + "2) You can go home\n"
         self._test_template_generate_actions(mock_return)
 
     def test_generate_actions_extra_alternative_numbering(self):
-        mock_return = "\n" + \
-        "1. You can eat apples.\n" + \
-        "2. You can go home.\n"
+        mock_return = "\n" + "1. You can eat apples.\n" + "2. You can go home.\n"
         self._test_template_generate_actions(mock_return)
 
     def test_generate_actions_extra_white_space(self):
-        mock_return = "  \n" + \
-        "  1)  You can eat apples.  \n" + \
-        "  2)  You can go home.  \n"
+        mock_return = "  \n" + "  1)  You can eat apples.  \n" + "  2)  You can go home.  \n"
         self._test_template_generate_actions(mock_return)
 
     def test_generate_actions_extra_continuation(self):
-        mock_return = "\n" + \
-        "1) You can eat apples.\n" + \
-        "2) You can go home.\n" + \
-        "\n" + \
-        "If you choose to go home, you go home.\n"
+        mock_return = (
+            "\n"
+            + "1) You can eat apples.\n"
+            + "2) You can go home.\n"
+            + "\n"
+            + "If you choose to go home, you go home.\n"
+        )
         self._test_template_generate_actions(mock_return)
 
     def _test_template_generate_actions(self, mock_return: str):

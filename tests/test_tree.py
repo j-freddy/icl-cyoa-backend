@@ -1,6 +1,7 @@
 import unittest
 
-from src.tree import GamebookNodeData, GamebookTree
+from src.tree import GamebookNodeData
+from src.tree import GamebookTree
 
 example_node_data = [
     {
@@ -50,7 +51,7 @@ class GamebookTreeTest(unittest.TestCase):
                 "paragraph": "Paragraph!",
                 "parentId": 0,
                 "childrenIds": [2, 3, 4],
-            }
+            },
         )
 
         self.assertEqual(node.node_id, 1)

@@ -1,6 +1,6 @@
 # Cyoa Server
 
-## Setting up the app 
+## Setting up the app
 
 Install [Python][1].
 
@@ -25,5 +25,4 @@ cd path/to/directory
 python -m src.server
 ```
 
-[1]: https://www.python.org/downloads/release/python-3108/ 
-
+[1]: https://www.python.org/downloads/release/python-3108/

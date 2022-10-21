@@ -1,9 +1,12 @@
 """ Module for the tree representation of the gamebook.
 """
-from typing import List, Optional
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+from dataclasses import field
+from typing import List
+from typing import Optional
 
-from dataclasses_json import dataclass_json, LetterCase
+from dataclasses_json import dataclass_json
+from dataclasses_json import LetterCase
 
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
@@ -25,9 +28,7 @@ class GamebookTree:
     """Class for representing the tree for a gamebook"""
 
     def __init__(self, node_data_list: List[GamebookNodeData]):
-        self.node_lookup = {
-            node_data.node_id: node_data for node_data in node_data_list
-        }
+        self.node_lookup = {node_data.node_id: node_data for node_data in node_data_list}
 
         self.next_node_id = max(node_data.node_id for node_data in node_data_list) + 1
 
