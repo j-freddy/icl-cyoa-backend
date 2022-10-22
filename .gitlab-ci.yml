@@ -5,7 +5,6 @@ variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   PRE_COMMIT_HOME: "${CI_PROJECT_DIR}/.cache/pre-commit"
 
-
 cache:
   paths:
     - .cache/pip
@@ -40,12 +39,22 @@ run-tests:
     paths:
       - ${PRE_COMMIT_HOME}
 
+deploy-int-latest:
+  image: ruby:3.1.2-bullseye
+  stage: deploy
+  script:
+    - gem install dpl
+    - dpl --provider=heroku --app=$CYOA_API_INT_LATEST --api-key=$DEPLOYMENT_KEY
+  except:
+    - master
+
 deploy-int-stable:
   image: ruby:3.1.2-bullseye
   stage: deploy
   script:
     - gem install dpl
     - dpl --provider=heroku --app=$CYOA_API_INT_STABLE --api-key=$DEPLOYMENT_KEY
+  when: manual
 
 deploy-production:
   image: ruby:3.1.2-bullseye
