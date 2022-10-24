@@ -23,7 +23,7 @@ repos:
     rev: v0.982
     hooks:
     -   id: mypy
-        args: [--ignore-missing-imports, --disallow-any-generics, --disallow-untyped-calls, --disallow-untyped-defs]
+        args: [--ignore-missing-imports, --disallow-any-generics]
         additional_dependencies: [types-all]
 -   repo: https://github.com/ambv/black
     rev: "22.10.0"

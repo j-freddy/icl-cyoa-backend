@@ -1,7 +1,10 @@
 """ Module for the tree representation of the gamebook.
 """
+from __future__ import annotations
+
 from dataclasses import dataclass
 from dataclasses import field
+from typing import Dict
 from typing import List
 from typing import Optional
 
@@ -27,16 +30,18 @@ class GamebookNodeData:
 class GamebookTree:
     """Class for representing the tree for a gamebook"""
 
-    def __init__(self, node_data_list: List[GamebookNodeData]):
-        self.node_lookup = {node_data.node_id: node_data for node_data in node_data_list}
+    def __init__(self, node_data_list: List[GamebookNodeData]) -> None:
+        self.node_lookup: Dict[int, GamebookNodeData] = {
+            node_data.node_id: node_data for node_data in node_data_list
+        }
 
-        self.next_node_id = max(node_data.node_id for node_data in node_data_list) + 1
+        self.next_node_id: int = max(node_data.node_id for node_data in node_data_list) + 1
 
     @staticmethod
-    def from_nodes_dict_list(node_data_dict_list):
+    def from_nodes_dict_list(node_data_dict_list) -> GamebookTree:
         """Deserializes from json-style dictionary to GamebookTree"""
         node_data_list = [
-            GamebookNodeData.from_dict(node_data) for node_data in node_data_dict_list
+            GamebookNodeData.from_dict(node_data) for node_data in node_data_dict_list  # type: ignore
         ]
 
         return GamebookTree(node_data_list)
@@ -83,7 +88,7 @@ class GamebookTree:
         """Get the action at node with the node_id."""
         return self.node_lookup[node_id].paragraph
 
-    def get_paragraph_list(self, end_node_id):
+    def get_paragraph_list(self, end_node_id: int) -> List[str]:
         """Generates a list of paragraph from the root node to end node
         inclusively."""
         rev_paragraphs = []
@@ -96,6 +101,7 @@ class GamebookTree:
             node = self.node_lookup[node_id]
             if node.paragraph is not None:
                 rev_paragraphs.append(node.paragraph)
-            node_id = node.parent_id
+            if node.parent_id is not None:
+                node_id = node.parent_id
 
         return list(reversed(rev_paragraphs))

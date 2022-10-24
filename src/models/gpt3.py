@@ -10,10 +10,10 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 class GPT3Model:
     def __init__(
         self,
-        temperature=0.5,
-        max_tokens=256,
-        presence_penalty=1,
-        frequency_penalty=1,
+        temperature: float = 0.5,
+        max_tokens: int = 256,
+        presence_penalty: int = 1,
+        frequency_penalty: int = 1,
     ) -> None:
         self.temperature = temperature
         self.max_tokens = max_tokens

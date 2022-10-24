@@ -16,7 +16,7 @@ class GamebookTextGenerator:
     def _option_prompt(num_options: int) -> str:
         return f"You have {num_options} options:"
 
-    def _generate_actions(self, full_text: str, num_options=2) -> List[str]:
+    def _generate_actions(self, full_text: str, num_options: int = 2) -> List[str]:
         prompt = full_text + " " + self._option_prompt(num_options)
         generated = self.model.complete(prompt)
         # Extract only the actions.
@@ -50,7 +50,7 @@ class GamebookTextGenerator:
     def _paragraphs_to_prompt(paragraph_list: List[str]) -> str:
         return " ".join(paragraph_list)
 
-    def expand_graph_once(self, tree: GamebookTree, expand_at_node=0) -> None:
+    def expand_graph_once(self, tree: GamebookTree, expand_at_node: int = 0) -> None:
         """Expand the graph at the specified node: Generate the paragraph if it
         is missing, and generate the action options for the paragraph otherwise.
         """
