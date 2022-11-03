@@ -9,6 +9,7 @@ example_node_data = [
         "paragraph": "Paragraph 0 ",
         "parentId": None,
         "childrenIds": [1, 2],
+        "endingParagraph": False,
     },
     {
         "nodeId": 1,
@@ -16,6 +17,7 @@ example_node_data = [
         "paragraph": "Paragraph 1 ",
         "parentId": 0,
         "childrenIds": [],
+        "endingParagraph": False,
     },
     {
         "nodeId": 2,
@@ -23,6 +25,7 @@ example_node_data = [
         "paragraph": "Paragraph 2 ",
         "parentId": 0,
         "childrenIds": [3, 4],
+        "endingParagraph": False,
     },
     {
         "nodeId": 3,
@@ -30,6 +33,7 @@ example_node_data = [
         "paragraph": "Paragraph 3 ",
         "parentId": 2,
         "childrenIds": [],
+        "endingParagraph": False,
     },
     {
         "nodeId": 4,
@@ -37,6 +41,7 @@ example_node_data = [
         "paragraph": "Paragraph 4 ",
         "parentId": 2,
         "childrenIds": [],
+        "endingParagraph": False,
     },
 ]
 

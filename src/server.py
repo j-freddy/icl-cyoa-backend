@@ -47,6 +47,17 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):  # noqa
             self.write_message(json.dumps({"nodes": graph.to_nodes_dict_list()}))
 
             # TODO: need to generate and send back a graph with expanded node - using text_generator
+        elif req_type == "endNode":
+            data = msg["data"]
+
+            graph = GamebookTree.from_nodes_dict_list(data["nodes"])
+            node_to_end = data["nodeToEnd"]
+
+            # Ends current graph path
+            GamebookTextGenerator(GPT3Model()).expand_graph_once(graph, node_to_end, True)
+            
+            self.write_message(json.dumps({"nodes": graph.to_nodes_dict_list()}))
+
         else:
             self.close()
 

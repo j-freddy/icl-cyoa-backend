@@ -49,9 +49,10 @@ class GamebookTextGenerator:
     def _paragraphs_to_prompt(paragraph_list: str):
         return " ".join(paragraph_list)
 
-    def expand_graph_once(self, tree: GamebookTree, expand_at_node=0) -> None:
+    def expand_graph_once(self, tree: GamebookTree, expand_at_node=0, end_story=False) -> None:
         """Expand the graph at the specified node: Generate the paragraph if it
         is missing, and generate the action options for the paragraph otherwise.
+        If end_story is true, then generate an ending paragraph.
         """
 
         paragraph_list = tree.get_paragraph_list(expand_at_node)
@@ -67,17 +68,30 @@ class GamebookTextGenerator:
 
             edited_action = self._action_to_second_person(end_action) + " "
 
-            # then we need to generate paragraph
-            generated_paragraph = self._generate_paragraph(
-                previous_text + " " + edited_action
-            )
-            tree.edit_node(
-                expand_at_node, paragraph=edited_action + generated_paragraph
-            )
-            return
+            if end_story:
+                 # End the graph's current path (leaf node): Generate an ending paragraph.
+                generated_paragraph = self._generate_paragraph(
+                    previous_text + " " + edited_action + "Generate an ending." + " "
+                )
+
+                tree.edit_node(
+                    expand_at_node, paragraph=edited_action + generated_paragraph + "The End.", ending_paragraph=True
+                )
+                return
+            else:
+                 # then we need to generate paragraph
+                generated_paragraph = self._generate_paragraph(
+                    previous_text + " " + edited_action
+                )
+                tree.edit_node(
+                    expand_at_node, paragraph=edited_action + generated_paragraph
+                )
+                return
 
         # else we need to generate new actions given the current text and
         # create new nodes for these actions
         generated_actions = self._generate_actions(previous_text)
         for generated_action in generated_actions:
             tree.make_node(parent_id=expand_at_node, action=generated_action)
+
+    
