@@ -20,6 +20,10 @@ class GamebookNodeData:
     parent_id: Optional[int]
     children_ids: List[int] = field(default_factory=list)
 
+    ending_paragraph: bool = False
+    
+   
+
 
 class GamebookTree:
     """Class for representing the tree for a gamebook"""
@@ -64,9 +68,12 @@ class GamebookTree:
         parent.children_ids.append(self.next_node_id)
         self.next_node_id += 1
 
-    def edit_node(self, node_id, action=None, paragraph=None):
+    def edit_node(self, node_id, action=None, paragraph=None, ending_paragraph=False):
         """Allow editing action and paragraph"""
         node = self.node_lookup[node_id]
+
+        if ending_paragraph:
+            node.ending_paragraph = True
 
         if action is not None:
             node.action = action
@@ -79,7 +86,7 @@ class GamebookTree:
         return self.node_lookup[node_id].action
 
     def get_paragraph(self, node_id):
-        """Get the action at node with the node_id."""
+        """Get the paragraph at node with the node_id."""
         return self.node_lookup[node_id].paragraph
 
     def get_paragraph_list(self, end_node_id):
