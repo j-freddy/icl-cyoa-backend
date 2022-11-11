@@ -6,8 +6,9 @@ import tornado
 import tornado.web
 
 from src.models.gpt3 import GPT3Model
-from src.text_generator import GamebookTextGenerator
-from src.tree import GamebookTree
+from src.gamebook_generator import GamebookGenerator
+from src.text_generator import TextGenerator
+from src.graph import GamebookGraph
 
 LISTEN_PORT = os.getenv('PORT', 8000)
 LISTEN_ADDRESS = "127.0.0.1"
@@ -25,29 +26,39 @@ class RequestHandler(tornado.web.RequestHandler):  # noqa
         msg = json.loads(json_msg)
 
         req_type = msg["type"]
+        
+        generator = GamebookGenerator(TextGenerator(GPT3Model()))
 
         if req_type == "expandNode":
             data = msg["data"]
 
-            graph = GamebookTree.from_nodes_dict_list(data["nodes"])
+            graph = GamebookGraph.from_graph_dict(data["graph"])
             node_to_expand = data["nodeToExpand"]
 
-            GamebookTextGenerator(GPT3Model()).expand_graph_once(graph, node_to_expand)
+            generator.expand_graph_once(graph, node_to_expand)
             # example serialization
-            self.write(json.dumps({"nodes": graph.to_nodes_dict_list()}))
+            self.write(json.dumps({"graph": graph.to_graph_dict()}))
 
             # TODO: need to generate and send back a graph with expanded node - using text_generator
         elif req_type == "endNode":
             data = msg["data"]
 
-            graph = GamebookTree.from_nodes_dict_list(data["nodes"])
+            graph = GamebookGraph.from_graph_dict(data["graph"])
             node_to_end = data["nodeToEnd"]
 
             # Ends current graph path
-            GamebookTextGenerator(GPT3Model()).expand_graph_once(graph, node_to_end, True)
+            generator.expand_graph_once(graph, node_to_end, True)
             
-            self.write(json.dumps({"nodes": graph.to_nodes_dict_list()}))
+            self.write(json.dumps({"graph": graph.to_graph_dict()}))
 
+        elif req_type == "connectNode":
+            data = msg["data"]
+            graph = GamebookGraph.from_graph_dict(data["graph"])
+            from_node = data["fromNode"]
+            to_node = data["toNode"]
+            
+            generator.bridge_node(graph, from_node, to_node)
+            self.write(json.dumps({"graph": graph.to_graph_dict()}))
         else:
             self.close()
 
