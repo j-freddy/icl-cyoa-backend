@@ -29,38 +29,32 @@ class RequestHandler(tornado.web.RequestHandler):  # noqa
         
         generator = GamebookGenerator(TextGenerator(GPT3Model()))
 
-        if req_type == "expandNode":
-            data = msg["data"]
+        data = msg["data"]
+        graph = GamebookGraph.from_graph_dict(data["graph"])
 
-            graph = GamebookGraph.from_graph_dict(data["graph"])
+        if req_type == "expandNode":
+
             node_to_expand = data["nodeToExpand"]
 
             generator.expand_graph_once(graph, node_to_expand)
-            # example serialization
-            self.write(json.dumps({"graph": graph.to_graph_dict()}))
 
-            # TODO: need to generate and send back a graph with expanded node - using text_generator
         elif req_type == "endNode":
-            data = msg["data"]
 
-            graph = GamebookGraph.from_graph_dict(data["graph"])
             node_to_end = data["nodeToEnd"]
 
             # Ends current graph path
-            generator.expand_graph_once(graph, node_to_end, True)
-            
-            self.write(json.dumps({"graph": graph.to_graph_dict()}))
+            generator.expand_graph_once(graph, node_to_end, is_ending=True)
 
         elif req_type == "connectNode":
-            data = msg["data"]
-            graph = GamebookGraph.from_graph_dict(data["graph"])
+
             from_node = data["fromNode"]
             to_node = data["toNode"]
             
             generator.bridge_node(graph, from_node, to_node)
-            self.write(json.dumps({"graph": graph.to_graph_dict()}))
-        else:
-            self.close()
+
+        self.write(json.dumps({"graph": graph.to_graph_dict()}))
+
+        
 
     def set_default_headers(self):
         self.set_header('Access-Control-Allow-Origin', '*')

@@ -4,7 +4,7 @@ from collections import defaultdict
 from typing import List
 from dataclasses import dataclass, field
 
-from dataclasses_json import dataclass_json, LetterCase, config
+from dataclasses_json import dataclass_json, LetterCase
 
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
@@ -20,6 +20,8 @@ class NarrativeNodeData:
     children_ids: List[int] = field(default_factory=list)
 
     is_ending: bool = False
+
+    type: str = "narrative"
     
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
@@ -33,6 +35,8 @@ class ActionNodeData:
     data: str
 
     children_ids: List[int] = field(default_factory=list)
+
+    type: str = "action"
     
 
 class GamebookGraph:
@@ -54,19 +58,22 @@ class GamebookGraph:
     @staticmethod
     def from_graph_dict(graph):
         """Deserializes from json-style dictionary to GamebookTree"""
-        node_data_list = [
-            NarrativeNodeData.from_dict(node_data) for node_data in graph["narratives"]
-        ] + [ActionNodeData.from_dict(node_data) for node_data in graph["actions"]]
+        narrative_nodes = [
+            NarrativeNodeData.from_dict(node_data) for node_data in graph["nodes"] if node_data["type"] == "narrative"
+        ]
+        action_nodes = [
+            ActionNodeData.from_dict(
+                node_data) for node_data in graph["nodes"] if node_data["type"] == "action"
+        ]
 
-        return GamebookGraph(node_data_list)
+        return GamebookGraph(narrative_nodes + action_nodes)
 
     def to_graph_dict(self):
         """Serializes class data into a json-style dictionary with list of node
         data"""
         return {
-            "narratives": [node_data.to_dict() for node_data in self.node_lookup.values() if isinstance(node_data, NarrativeNodeData)],
-            "actions": [node_data.to_dict() for node_data in self.node_lookup.values() if isinstance(node_data, ActionNodeData)]
-            }
+            "nodes": [node_data.to_dict() for node_data in self.node_lookup.values()]
+        }
 
     def _get_node(self, node_id):
         return self.node_lookup[node_id]

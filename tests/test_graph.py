@@ -10,33 +10,36 @@ class GamebookGraphTest(TestCase):
         cls.example_action = "Action"
         cls.example_narrative = "Narrative"
         cls.example_node_data = {
-            "narratives": [
+            "nodes": [
                 {
+                    "type": "narrative",
                     "nodeId": 0,
                     "data": "N0",
                     "childrenIds": [1, 2],
                     "isEnding": False
                 },
                 {
+                    "type": "narrative",
                     "nodeId": 3,
                     "data": "N3",
                     "childrenIds": [],
                     "isEnding": True
                 },
                 {
+                    "type": "narrative",
                     "nodeId": 4,
                     "data": "N4",
                     "childrenIds": [],
                     "isEnding": False
-                }
-            ],
-            "actions": [
+                },
                 {
+                    "type": "action",
                     "nodeId": 1,
                     "data": "A1",
                     "childrenIds": [3]
                 },
                 {
+                    "type": "action",
                     "nodeId": 2,
                     "data": "A2",
                     "childrenIds": [4]
