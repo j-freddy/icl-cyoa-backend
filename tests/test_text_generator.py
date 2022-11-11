@@ -1,88 +1,92 @@
+import unittest
 from unittest import TestCase
 from unittest.mock import Mock
+from parameterized import parameterized
 
-from src.text_generator import GamebookTextGenerator
+from src.text_generator import TextGenerator
 from src.models.gpt3 import GPT3Model
 
-class GamebookTextGeneratorTest(TestCase):
+class TextGeneratorTest(TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
         cls.sample_text = "Sample text."
+        cls.sample_suffix = "Sample suffix."
         cls.sample_response = "Sample response."
 
-    def test_generate_paragraph(self):
-        mock_model = Mock(GPT3Model)
-        generator = GamebookTextGenerator(mock_model)
+    def setUp(self) -> None:
+        self.mock_model = Mock(GPT3Model)
+        self.generator = TextGenerator(self.mock_model)
 
-        mock_model.complete.return_value = self.sample_response
-        paragraph = generator._generate_paragraph(self.sample_text)
-        mock_model.complete.assert_called_once_with(self.sample_text)
+    def test_generate_paragraph(self):
+
+        self.mock_model.complete.return_value = self.sample_response
+        paragraph = self.generator.generate_paragraph(self.sample_text)
+        self.mock_model.complete.assert_called_once_with(self.sample_text)
         self.assertEqual(self.sample_response, paragraph)
 
     def test_action_to_second_person(self):
-        mock_model = Mock(GPT3Model)
-        generator = GamebookTextGenerator(mock_model)
 
-        mock_model.edit.return_value = self.sample_response
+        self.mock_model.edit.return_value = self.sample_response
         expected_instruction = "Rewrite this as 'You choose ...'"
-        edited = generator._action_to_second_person(self.sample_text)
-        mock_model.edit.assert_called_once_with(text_to_edit=self.sample_text, 
-                instruction=expected_instruction)
+        edited = self.generator.action_to_second_person(self.sample_text)
+        self.mock_model.edit.assert_called_once_with(self.sample_text, expected_instruction)
         self.assertEqual(self.sample_response, edited)
     
     def test_option_prompt(self):
         num_options = 5
         expected_text = "You have 5 options:"
-        actual_text = GamebookTextGenerator._option_prompt(num_options)
+        actual_text = TextGenerator.option_prompt(num_options)
         self.assertEqual(expected_text, actual_text)
 
-    def test_paragraphs_to_prompt(self):
-        paragraphs = ["P1", "P2", "P3"]
-        expected_text = "P1 P2 P3"
-        actual_text = GamebookTextGenerator._paragraphs_to_prompt(paragraphs)
-        self.assertEqual(expected_text, actual_text)
+    def test_summarise(self):
+        self.mock_model.complete.return_value = self.sample_response
+        expected_instruction = "Summarize the story in 2nd person:"
+        expected_prompt = f"{self.sample_text}\n\n{expected_instruction}"
+        actual_response = self.generator.summarise(self.sample_text)
+        self.mock_model.complete.assert_called_once_with(expected_prompt)
+        self.assertEqual(self.sample_response, actual_response)
 
-    def test_generate_actions_correct_format(self):
-        mock_return = "\n" + \
+    def test_bridge_content(self):
+        self.mock_model.insert.return_value = self.sample_response
+        actual_response = self.generator.bridge_content(self.sample_text, self.sample_suffix)
+        self.mock_model.insert.assert_called_once_with(f"{self.sample_text}\n\n", f"\n\n{self.sample_suffix}")
+        self.assertEqual(self.sample_response, actual_response)
+
+    generate_actions_return_values = [
+        # Normal
+        "\n" + \
         "1) You can eat apples.\n" + \
-        "2) You can go home.\n"
-        self._test_template_generate_actions(mock_return)
-
-    def test_generate_actions_without_period(self):
-        mock_return = "\n" + \
+        "2) You can go home.\n",
+        # Without period
+        "\n" + \
         "1) You can eat apples\n" + \
-        "2) You can go home\n"
-        self._test_template_generate_actions(mock_return)
-
-    def test_generate_actions_extra_alternative_numbering(self):
-        mock_return = "\n" + \
+        "2) You can go home\n",
+        # Alternative numbering
+        "\n" + \
         "1. You can eat apples.\n" + \
-        "2. You can go home.\n"
-        self._test_template_generate_actions(mock_return)
-
-    def test_generate_actions_extra_white_space(self):
-        mock_return = "  \n" + \
+        "2. You can go home.\n",
+        # Extra whitespace
+        "  \n" + \
         "  1)  You can eat apples.  \n" + \
-        "  2)  You can go home.  \n"
-        self._test_template_generate_actions(mock_return)
-
-    def test_generate_actions_extra_continuation(self):
-        mock_return = "\n" + \
+        "  2)  You can go home.  \n",
+        # Extra content
+        "\n" + \
         "1) You can eat apples.\n" + \
         "2) You can go home.\n" + \
         "\n" + \
         "If you choose to go home, you go home.\n"
-        self._test_template_generate_actions(mock_return)
+    ]
 
-    def _test_template_generate_actions(self, mock_return: str):
-        mock_model = Mock(GPT3Model)
-        generator = GamebookTextGenerator(mock_model)
-
-        mock_model.complete.return_value = mock_return
+    @parameterized.expand(generate_actions_return_values)
+    def test_template_generate_actions(self, mock_return: str):
+        self.mock_model.complete.return_value = mock_return
         option_text = "You have 2 options:"
-        actions = generator._generate_actions(self.sample_text)
-        mock_model.complete.assert_called_once_with(self.sample_text + " " + option_text)
+        actions = self.generator.generate_actions(self.sample_text)
+        self.mock_model.complete.assert_called_once_with(self.sample_text + " " + option_text)
         self.assertEqual(2, len(actions))
         self.assertEqual("You can eat apples.", actions[0])
         self.assertEqual("You can go home.", actions[1])
+
+if __name__ == "__main__":
+    unittest.main()

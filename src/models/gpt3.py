@@ -25,6 +25,18 @@ class GPT3Model:
         )
         return response.choices[0].text
 
+    def insert(self, prompt: str, suffix: str) -> str:
+        response = openai.Completion.create(
+            model="text-davinci-002",
+            prompt=prompt,
+            suffix=suffix,
+            temperature=self.temperature,
+            max_tokens=self.max_tokens,
+            presence_penalty=self.presence_penalty,
+            frequency_penalty=self.frequency_penalty,
+        )
+        return response.choices[0].text
+
     def edit(self, text_to_edit: str, instruction: str) -> str:
         response = openai.Edit.create(
             model="text-davinci-edit-001",
