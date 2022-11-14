@@ -28,9 +28,8 @@ class GamebookGenerator:
         if is_ending:
             prompt += "\n\nGenerate an ending. "
 
-        generated_narrative = self.text_generator.generate_paragraph(
-            prompt
-        )
+        generated_narrative = edited_action + self.text_generator.generate_paragraph(prompt)
+
         if is_ending:
             generated_narrative += " The end."
 

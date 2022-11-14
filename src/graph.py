@@ -1,7 +1,7 @@
 """ Module for the tree representation of the gamebook.
 """
 from collections import defaultdict
-from typing import List
+from typing import List, Union
 from dataclasses import dataclass, field
 
 from dataclasses_json import dataclass_json, LetterCase
@@ -42,7 +42,7 @@ class ActionNodeData:
 class GamebookGraph:
     """Class for representing the graph for a gamebook"""
 
-    def __init__(self, node_data_list: List[NarrativeNodeData | ActionNodeData]):
+    def __init__(self, node_data_list: List[Union[NarrativeNodeData,  ActionNodeData]]):
         self.node_lookup = {
             node_data.node_id: node_data for node_data in node_data_list
         }
@@ -127,10 +127,11 @@ class GamebookGraph:
 
     def is_narrative(self, node_id):
         node = self.node_lookup[node_id]
-        match node:
-            case NarrativeNodeData():
-                return True
-        return False
+        return node.type == "narrative"
+        # match node:
+        #     case NarrativeNodeData():
+        #         return True
+        # return False
     
     def get_paragraph_list(self, end_node_id):
         """Generates a list of paragraph from the root node to end node

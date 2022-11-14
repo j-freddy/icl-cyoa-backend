@@ -37,7 +37,7 @@ class GamebookGeneratorTest(TestCase):
         self.mock_text_generator.generate_paragraph.assert_called_once()
         self.mock_graph.make_narrative_node.assert_called_once_with(
             parent_id=self.example_id,
-            narrative=self.sample_narrative,
+            narrative=self.sample_action + " " + self.sample_narrative,
             is_ending=False)
         
     def test_generate_action_from_narrative(self):
