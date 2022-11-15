@@ -36,7 +36,7 @@ class GamebookGenerator:
         graph.make_narrative_node(
             parent_id=from_node_id, narrative=generated_narrative, is_ending=is_ending)
 
-    def generate_action_from_narrative(self, graph: GamebookGraph, from_node_id: int) -> None:
+    def generate_actions_from_narrative(self, graph: GamebookGraph, from_node_id: int) -> None:
         if not graph.is_narrative(from_node_id):
             raise TypeError
         
@@ -56,9 +56,4 @@ class GamebookGenerator:
         bridge_node_id = graph.make_narrative_node(parent_id=from_node_id, narrative=bridge)
         
         graph.connect_nodes(bridge_node_id, to_node_id)
-    
-    def expand_graph_once(self, graph: GamebookGraph, from_node_id: int, is_ending = False):
-        if graph.is_narrative(from_node_id):
-            self.generate_action_from_narrative(graph, from_node_id)
-        else:
-            self.generate_narrative_from_action(graph, from_node_id, is_ending)
+        

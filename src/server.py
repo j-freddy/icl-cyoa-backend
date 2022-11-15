@@ -32,18 +32,23 @@ class RequestHandler(tornado.web.RequestHandler):  # noqa
         data = msg["data"]
         graph = GamebookGraph.from_graph_dict(data["graph"])
 
-        if req_type == "expandNode":
+        if req_type == "generateActions":
+
+            node_to_expand = data["nodeToExpand"]
+            generator.generate_actions_from_narrative(graph, node_to_expand)
+
+        elif req_type == "generateNarrative":
 
             node_to_expand = data["nodeToExpand"]
 
-            generator.expand_graph_once(graph, node_to_expand)
+            generator.generate_narrative_from_action(graph, node_to_expand)
 
         elif req_type == "endNode":
 
             node_to_end = data["nodeToEnd"]
-
+    
             # Ends current graph path
-            generator.expand_graph_once(graph, node_to_end, is_ending=True)
+            generator.generate_narrative_from_action(graph, node_to_end, is_ending=True)
 
         elif req_type == "connectNode":
 
