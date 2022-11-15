@@ -40,14 +40,14 @@ class GamebookGeneratorTest(TestCase):
             narrative=self.sample_action + " " + self.sample_narrative,
             is_ending=False)
         
-    def test_generate_action_from_narrative(self):
+    def test_generate_actions_from_narrative(self):
         self.mock_text_generator.generate_actions.return_value = [self.sample_action,
             self.sample_text]
         self.mock_graph.is_narrative.return_value = True
 
         self.mock_graph.get_paragraph_list.return_value = self.sample_paragraph_list
 
-        self.generator.generate_action_from_narrative(
+        self.generator.generate_actions_from_narrative(
             self.mock_graph, self.example_id)
 
         self.mock_text_generator.generate_actions.assert_called_once()
