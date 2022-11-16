@@ -31,16 +31,6 @@ class RequestHandler(tornado.web.RequestHandler):  # noqa
 
         data = msg["data"]
 
-        if req_type == "generateActions":
-
-            node_to_expand = data["nodeToExpand"]
-            generator.generate_actions_from_narrative(graph, node_to_expand)
-
-        elif req_type == "generateNarrative":
-            node_to_expand = data["nodeToExpand"]
-
-            generator.generate_narrative_from_action(graph, node_to_expand)
-
         if req_type == "startNode":
 
             genre_prompt = data["prompt"]
@@ -48,9 +38,21 @@ class RequestHandler(tornado.web.RequestHandler):  # noqa
             # Generates the first paragraph given a certain genre (passed from front end)
             # as well as the corresponding actions
             graph = generator.generate_start_from_genre(genre_prompt)
+        
+        else:
+            graph = GamebookGraph.from_graph_dict(data["graph"])
+
+        if req_type == "generateActions":
+
+            node_to_expand = data["nodeToExpand"]
+            generator.generate_actions_from_narrative(graph, node_to_expand)
+
+        elif req_type == "generateNarrative":
+
+            node_to_expand = data["nodeToExpand"]
+            generator.generate_narrative_from_action(graph, node_to_expand)
 
         elif req_type == "endNode":
-            graph = GamebookGraph.from_graph_dict(data["graph"])
 
             node_to_end = data["nodeToEnd"]
     
@@ -58,7 +60,6 @@ class RequestHandler(tornado.web.RequestHandler):  # noqa
             generator.generate_narrative_from_action(graph, node_to_end, is_ending=True)
 
         elif req_type == "connectNode":
-            graph = GamebookGraph.from_graph_dict(data["graph"])
 
             from_node = data["fromNode"]
             to_node = data["toNode"]
@@ -67,7 +68,7 @@ class RequestHandler(tornado.web.RequestHandler):  # noqa
             
 
         self.write(json.dumps({"graph": graph.to_graph_dict()}))
-
+        
     def set_default_headers(self):
         self.set_header('Access-Control-Allow-Origin', '*')
         self.set_header('Access-Control-Allow-Headers', '*')
