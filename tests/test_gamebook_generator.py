@@ -16,6 +16,7 @@ class GamebookGeneratorTest(TestCase):
         cls.sample_text = "Sample text."
         cls.sample_narrative = "Sample narrative."
         cls.sample_action = "Sample action."
+        cls.sample_genre_prompt = "Sample genre prompt."
         cls.sample_paragraph_list = ["Paragraph.", "Other."]
     
     def setUp(self) -> None:
@@ -75,6 +76,19 @@ class GamebookGeneratorTest(TestCase):
         )
 
         self.mock_graph.connect_nodes.assert_called_once_with(bridge_id, self.example_id_alt)
+
+    def test_generate_start_from_genre(self):
+        self.mock_text_generator.generate_paragraph.return_value = self.sample_narrative
+        self.mock_text_generator.generate_actions.return_value = [self.sample_action,
+            self.sample_text]
+        
+        self.generator.generate_start_from_genre(self.sample_genre_prompt)
+        self.mock_text_generator.generate_paragraph.assert_called_once()
+
+        self.mock_graph.is_narrative.return_value = True
+        self.mock_graph.get_paragraph_list.return_value = self.sample_paragraph_list
+        self.mock_text_generator.generate_actions.assert_called_once()
+
 
 
 if __name__ == "__main__":
