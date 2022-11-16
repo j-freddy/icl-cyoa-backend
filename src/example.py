@@ -10,37 +10,18 @@ tree = GamebookGraph.from_graph_dict(
         "narratives": [
             {
                 "nodeId": 0,
-                "data": "N0",
-                "childrenIds": [1, 2],
-                "isEnding": False
-            },
-            {
-                "nodeId": 3,
-                "data": "N3",
-                "childrenIds": [],
-                "isEnding": True
-            },
-            {
-                "nodeId": 4,
-                "data": "N4",
-                "childrenIds": [],
+                "data": "Write a dystopian story from a second person's perspective.",
                 "isEnding": False
             }
         ],
         "actions": [
-            {
-                "nodeId": 1,
-                "data": "A1",
-                "childrenIds": [3]
-            },
-            {
-                "nodeId": 2,
-                "data": "A2",
-                "childrenIds": [4]
-            }
         ]
+    
     }
 )
 print(tree.to_graph_dict())
-generator.bridge_node(tree, 1, 2)
+generator.expand_graph_once(tree, 0, start_genre=True)
 print(tree.to_graph_dict())
+
+#graph = generator.generate_start_from_genre("Write a dystopian story from a second person's perspective.")
+#print(graph.to_graph_dict())

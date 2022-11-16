@@ -2,7 +2,7 @@
 """
 
 from src.text_generator import TextGenerator
-from src.graph import GamebookGraph
+from src.graph import GamebookGraph, NarrativeNodeData
 
 
 class GamebookGenerator:
@@ -56,4 +56,22 @@ class GamebookGenerator:
         bridge_node_id = graph.make_narrative_node(parent_id=from_node_id, narrative=bridge)
         
         graph.connect_nodes(bridge_node_id, to_node_id)
-        
+    
+    def generate_start_from_genre(self, genre_prompt) -> GamebookGraph:
+        generated_narrative = self.text_generator.generate_paragraph(
+            genre_prompt
+        )
+
+        generated_narrative = generated_narrative.replace("\n", "") + "\n"
+
+        root = NarrativeNodeData(
+            node_id= 0,
+            data= generated_narrative,
+            is_ending= False
+        )
+
+        graph = GamebookGraph([root])
+
+        self.generate_actions_from_narrative(graph, 0)
+
+        return graph
