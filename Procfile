@@ -1,1 +1,1 @@
-web: python -m src.server
+web: python -m src.server.run_server
