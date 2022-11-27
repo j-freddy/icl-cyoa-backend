@@ -22,7 +22,7 @@ Run the following in the app root directory to run the server.
 # Go to root directory of the repo
 cd path/to/directory
 # Run the app
-python -m src.server
+python -m src.server.run_server
 ```
 
 [1]: https://www.python.org/downloads/release/python-3108/ 
