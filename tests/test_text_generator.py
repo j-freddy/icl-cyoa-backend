@@ -88,5 +88,18 @@ class TextGeneratorTest(TestCase):
         self.assertEqual("You can eat apples.", actions[0])
         self.assertEqual("You can go home.", actions[1])
 
+    def test_new_story(self):
+        self.mock_model.complete.return_value = self.sample_response
+        initial_values = [
+            ("themes", "jolly, fantasy"),
+            ("items", ""),
+            ("characters", "Talice, Grob")
+        ]
+        story = self.generator.new_story(initial_values)
+        expected_prompt = "Write an adventure story with themes: \"jolly, fantasy\"; " + \
+                "items: \"\"; characters: \"Talice, Grob\" in second person:"
+        self.mock_model.complete.assert_called_once_with(expected_prompt)
+        self.assertEqual(self.sample_response, story)
+
 if __name__ == "__main__":
     unittest.main()
