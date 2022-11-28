@@ -57,6 +57,22 @@ class GamebookGenerator:
         
         graph.connect_nodes(bridge_node_id, to_node_id)
     
+    def generate_initial_story(self, initial_story_prompt) -> GamebookGraph:
+        initial_values = [(elem["attribute"], elem["content"]) for elem in initial_story_prompt]
+        generated_narrative = self.text_generator.new_story(initial_values)
+
+        root = NarrativeNodeData(
+            node_id= 0,
+            data= generated_narrative,
+            is_ending= False
+        )
+        graph = GamebookGraph([root])
+
+        self.generate_actions_from_narrative(graph, 0)
+
+        return graph
+
+    # TODO: Remove this once the front end is changed
     def generate_start_from_genre(self, genre_prompt) -> GamebookGraph:
         generated_narrative = self.text_generator.generate_paragraph(
             genre_prompt

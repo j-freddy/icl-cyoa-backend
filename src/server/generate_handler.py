@@ -52,6 +52,12 @@ class GenerateHandler(AuthBaseHandler):  # noqa
             # as well as the corresponding actions
             graph = generator.generate_start_from_genre(genre_prompt)
 
+        elif req_type == "initialStory":
+
+            initial_story_prompt = data["prompt"]
+
+            graph = generator.generate_initial_story(initial_story_prompt)    
+
         else:
             graph = GamebookGraph.from_graph_dict(data["graph"])
 

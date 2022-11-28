@@ -1,5 +1,5 @@
 from src.models.gpt3 import GPT3Model
-from typing import List
+from typing import List, Tuple
 
 class TextGenerator:
     """Class for text manipulation and generation using a model"""
@@ -46,3 +46,9 @@ class TextGenerator:
 
     def bridge_content(self, from_: str, to: str) -> str:
         return self.model.insert(f"{from_}\n\n", f"\n\n{to}")
+
+    def new_story(self, initial_values: List[Tuple[str, str]]) -> str:
+        description = "; ".join([f"{attribute}: \"{content}\"" for
+                (attribute, content) in initial_values])
+        prompt = f"Write an adventure story with {description} in second person:"
+        return self.model.complete(prompt)
