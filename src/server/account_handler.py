@@ -180,7 +180,10 @@ class UserStoriesHandler(AuthBaseHandler):  # noqa
             story = await self.settings["db"]["stories"].find_one(
                 {"_id": story_id}, {"_id": 0, "email": 0}
             )
-            self.write(json.dumps(story))
+            if story["user_email"] == email:
+                self.write(json.dumps(story))
+            else:
+                self.set_status(403)
 
 
 class SignupHandler(WebBaseHandler):  # noqa
