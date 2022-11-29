@@ -150,7 +150,13 @@ class UserStoriesHandler(AuthBaseHandler):  # noqa
                 temp_story_list.append(story)
             # TODO: remove this later, for debugging only
             #  TODO: make this cleaner
-            story_list = [{"name": story["name"], "storyId": story["_id"]} for story in temp_story_list]
+            story_list = []
+            for story in temp_story_list:
+                firstParagraph = "ATTENTION: First paragraph of story not yet generated."
+                totalSections = len(story["story"]["nodes"])
+                if story["story"]["nodes"]:
+                    firstParagraph = story["story"]["nodes"][0]["data"]
+                story_list.append({"name": story["name"], "storyId": story["_id"], "firstParagraph": firstParagraph, "totalSections": totalSections})
             self.write(json.dumps({"stories": story_list}))
 
         elif req_type == "saveName":
