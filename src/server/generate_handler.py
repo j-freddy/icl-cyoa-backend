@@ -33,8 +33,8 @@ class GenerateHandler(AuthBaseHandler):  # noqa
     def check_origin(self, origin: str) -> bool:
         return True
 
-    async def on_open(self):
-        email = await self.get_email_from_session()
+    async def open(self):
+        email = await self.get_email_from_auth()
         user = await self.settings["db"]["login_credentials"].find_one({
             "email": email,
         })
