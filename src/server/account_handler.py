@@ -65,8 +65,12 @@ class LoginHandler(AuthBaseHandler):  # noqa
             return
         print("logged in using session cookie")
 
+        user = await self.settings["db"]["login_credentials"].find_one({
+                "email": email,
+            })
         # write the email for display on the ui
-        self.write(json.dumps({"email": email}))
+        api_key = user["api_key"]
+        self.write(json.dumps({"email": email, "apiKey": api_key}))
 
     async def post(self):
         body = self.request.body
@@ -90,6 +94,8 @@ class LoginHandler(AuthBaseHandler):  # noqa
         else:
             print("no matching credentials!")
             self.set_status(401)
+        api_key = find_user["api_key"]
+        self.write(json.dumps({"apiKey": api_key}))
 
 
 class SignupHandler(AuthBaseHandler):  # noqa
@@ -115,6 +121,34 @@ class SignupHandler(AuthBaseHandler):  # noqa
                 "cyoa_session", credentials["session_id"], samesite="None", secure=True
             )
             print("added credentials to db!")
+
+
+class APIKeyHandler(AuthBaseHandler):
+
+    async def get(self):
+        email = await self.get_email_from_session()
+        if email is None:
+            self.set_status(401)
+            return
+        user = await self.settings["db"]["login_credentials"].find_one({
+            "email": email,
+        })
+        return user["api_key"]
+
+    async def post(self):
+        email = await self.get_email_from_session()
+        if email is None:
+            self.set_status(401)
+            return
+        body = json.loads(self.request.body)
+        api_key = body["apiKey"]
+        await self.settings["db"]["login_credentials"].find_one_and_update(
+            {
+                "email": email,
+            },
+            {"$set": {"api_key": api_key}},
+            return_document=ReturnDocument.AFTER,
+        )
 
 
 class UserStoriesHandler(AuthBaseHandler):  # noqa
@@ -209,6 +243,7 @@ class SignupHandler(WebBaseHandler):  # noqa
         credentials = json.loads(body)
         credentials["_id"]: str = str(bson.ObjectId())
         credentials["session_id"]: str = str(uuid.uuid4())
+        credentials["api_key"] = ""
         # TODO: remove code duplication, move db operations out to a separate method in base class
 
         user = await self.settings["db"]["login_credentials"].find_one(

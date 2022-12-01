@@ -33,6 +33,13 @@ class GenerateHandler(AuthBaseHandler):  # noqa
     def check_origin(self, origin: str) -> bool:
         return True
 
+    async def on_open(self):
+        email = await self.get_email_from_session()
+        user = await self.settings["db"]["login_credentials"].find_one({
+            "email": email,
+        })
+        self.api_key = user["api_key"]
+
     def on_message(self, json_msg):
         """
         Message received on channel
@@ -43,7 +50,7 @@ class GenerateHandler(AuthBaseHandler):  # noqa
         req_type = msg["type"]
         data = msg["data"]
 
-        generator = GamebookGenerator(TextGenerator(GPT3Model()))
+        generator = GamebookGenerator(TextGenerator(GPT3Model(self.api_key)))
 
         if req_type == "startNode":
             genre_prompt = data["prompt"]
