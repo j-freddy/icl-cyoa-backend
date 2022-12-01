@@ -3,7 +3,7 @@ import motor
 import tornado
 
 from src.config import get_db_url
-from src.server.account_handler import LoginHandler, SignupHandler, UserStoriesHandler
+from src.server.account_handler import APIKeyHandler, LoginHandler, SignupHandler, UserStoriesHandler
 from src.server.generate_handler import GenerateHandler
 
 LISTEN_PORT = os.getenv("PORT", 8000)
@@ -19,6 +19,7 @@ def main():
             (r"/login", LoginHandler),
             (r"/signup", SignupHandler),
             (r"/stories", UserStoriesHandler),
+            (r"/key", APIKeyHandler),
         ],
         db=db,
         debug=bool(os.getenv("DEV", False)),

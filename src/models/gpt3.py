@@ -1,14 +1,13 @@
-import os
 import openai
 from dotenv import load_dotenv
 
 load_dotenv()
-openai.api_key = os.getenv('OPENAI_API_KEY')
 
 class GPT3Model:
     
-    def __init__(self, temperature=0.5, max_tokens=256, presence_penalty=1,
+    def __init__(self, api_key, temperature=0.5, max_tokens=256, presence_penalty=1,
             frequency_penalty = 1) -> None:
+        openai.api_key = api_key
         self.temperature = temperature
         self.max_tokens = max_tokens
         self.presence_penalty = presence_penalty
