@@ -190,6 +190,17 @@ class UserStoriesHandler(AuthBaseHandler):  # noqa
                 self.write(json.dumps(story))
             else:
                 self.set_status(403)
+        
+        elif req_type == "deleteStoryFromId":
+            story = await self.settings["db"]["stories"].find_one(
+                {"_id": story_id}, {"_id": 0, "email": 0}
+            )
+            if story["user_email"] == email:
+                _ = await self.settings["db"]["stories"].delete_one(
+                {"_id": story_id}
+                )
+            else:
+                self.set_status(403)
 
 
 class SignupHandler(WebBaseHandler):  # noqa
