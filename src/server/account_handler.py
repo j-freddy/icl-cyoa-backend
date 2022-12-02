@@ -133,7 +133,7 @@ class APIKeyHandler(AuthBaseHandler):
         user = await self.settings["db"]["login_credentials"].find_one({
             "email": email,
         })
-        return user["api_key"]
+        self.write(json.dumps({"apiKey": user["api_key"]}))
 
     async def post(self):
         email = await self.get_email_from_session()
@@ -149,6 +149,10 @@ class APIKeyHandler(AuthBaseHandler):
             {"$set": {"api_key": api_key}},
             return_document=ReturnDocument.AFTER,
         )
+        user = await self.settings["db"]["login_credentials"].find_one({
+            "email": email,
+        })
+        self.write(json.dumps({"apiKey": user["api_key"]}))
 
 
 class UserStoriesHandler(AuthBaseHandler):  # noqa
