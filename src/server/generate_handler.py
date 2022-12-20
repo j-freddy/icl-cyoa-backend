@@ -74,13 +74,14 @@ class GenerateHandler(AuthBaseHandler):  # noqa
 
         elif req_type == "generateNarrative":
             node_to_expand = data["nodeToExpand"]
-            generator.generate_narrative_from_action(graph, node_to_expand)
-
-        elif req_type == "endNode":
-            node_to_end = data["nodeToEnd"]
-
-            # Ends current graph path
-            generator.generate_narrative_from_action(graph, node_to_end, is_ending=True)
+            is_ending = data["isEnding"]
+            descriptor = data["descriptor"]
+            generator.generate_narrative_from_action(
+                graph, 
+                node_to_expand, 
+                is_ending, 
+                descriptor,
+            )
 
         elif req_type == "connectNode":
             from_node = data["fromNode"]
