@@ -35,9 +35,21 @@ class TextGenerator:
                 return actions
         return actions
 
-    def generate_paragraph(self, full_text: str) -> str:
+    def generate_narrative(self, full_text: str, is_ending: bool=False,
+            descriptor: str=None) -> str:
         prompt = full_text
-        return self.model.complete(prompt)
+
+        if descriptor is not None:
+            prompt += f"\n\nGenerate a {descriptor} {'ending' if is_ending else 'continuation'}: "
+        elif is_ending:
+            prompt += "\n\nGenerate an ending: "
+
+        response = self.model.complete(prompt)
+
+        if is_ending:
+            response += " The end."
+
+        return response
 
     def summarise(self, content: str) -> str:
         instruction = "Summarize the story in 2nd person:"

@@ -18,12 +18,22 @@ class TextGeneratorTest(TestCase):
         self.mock_model = Mock(GPT3Model)
         self.generator = TextGenerator(self.mock_model)
 
-    def test_generate_paragraph(self):
+    test_generate_narrative_cases = [
+        (False, None, ""),
+        (True, None, "\n\nGenerate an ending: "),
+        (False, "happy", "\n\nGenerate a happy continuation: "),
+        (True, "happy", "\n\nGenerate a happy ending: "),
+    ]
+
+    @parameterized.expand(test_generate_narrative_cases)
+    def test_generate_narrative(self, is_ending, descriptor, extra_text):
 
         self.mock_model.complete.return_value = self.sample_response
-        paragraph = self.generator.generate_paragraph(self.sample_text)
-        self.mock_model.complete.assert_called_once_with(self.sample_text)
-        self.assertEqual(self.sample_response, paragraph)
+        paragraph = self.generator.generate_narrative(self.sample_text, 
+                is_ending=is_ending, descriptor=descriptor)
+        self.mock_model.complete.assert_called_once_with(self.sample_text + extra_text)
+        expected = self.sample_response + (" The end." if is_ending else "")
+        self.assertEqual(expected, paragraph)
 
     def test_action_to_second_person(self):
 
