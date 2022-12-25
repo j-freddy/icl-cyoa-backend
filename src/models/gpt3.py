@@ -5,8 +5,8 @@ load_dotenv()
 
 class GPT3Model:
     
-    def __init__(self, api_key, temperature=0.5, max_tokens=256, presence_penalty=1,
-            frequency_penalty = 1) -> None:
+    def __init__(self, api_key, temperature=0.5, max_tokens=256, presence_penalty=2,
+            frequency_penalty = 2) -> None:
         openai.api_key = api_key
         self.temperature = temperature
         self.max_tokens = max_tokens
@@ -15,7 +15,7 @@ class GPT3Model:
 
     def complete(self, prompt: str) -> str:
         response = openai.Completion.create(
-            model="text-davinci-002",
+            model="text-davinci-003",
             prompt=prompt,
             temperature=self.temperature,
             max_tokens=self.max_tokens,
@@ -26,7 +26,7 @@ class GPT3Model:
 
     def insert(self, prompt: str, suffix: str) -> str:
         response = openai.Completion.create(
-            model="text-davinci-002",
+            model="text-davinci-003",
             prompt=prompt,
             suffix=suffix,
             temperature=self.temperature,
