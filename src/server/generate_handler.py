@@ -49,17 +49,11 @@ class GenerateHandler(AuthBaseHandler):  # noqa
 
         req_type = msg["type"]
         data = msg["data"]
+        temperature = msg["temperature"]
 
-        generator = GamebookGenerator(TextGenerator(GPT3Model(self.api_key)))
+        generator = GamebookGenerator(TextGenerator(GPT3Model(self.api_key, temperature=temperature)))
 
-        if req_type == "startNode":
-            genre_prompt = data["prompt"]
-
-            # Generates the first paragraph given a certain genre (passed from front end)
-            # as well as the corresponding actions
-            graph = generator.generate_start_from_genre(genre_prompt)
-
-        elif req_type == "initialStory":
+        if req_type == "initialStory":
 
             initial_story_prompt = data["prompt"]
 
@@ -76,11 +70,15 @@ class GenerateHandler(AuthBaseHandler):  # noqa
             node_to_expand = data["nodeToExpand"]
             is_ending = data["isEnding"]
             descriptor = data["descriptor"]
+            details = data["details"]
+            style = data["style"]
             generator.generate_narrative_from_action(
                 graph, 
                 node_to_expand, 
                 is_ending, 
                 descriptor,
+                details,
+                style
             )
 
         elif req_type == "connectNode":

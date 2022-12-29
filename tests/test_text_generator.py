@@ -20,9 +20,9 @@ class TextGeneratorTest(TestCase):
 
     test_generate_narrative_cases = [
         (False, None, ""),
-        (True, None, "\n\nGenerate an ending: "),
-        (False, "happy", "\n\nGenerate a happy continuation: "),
-        (True, "happy", "\n\nGenerate a happy ending: "),
+        (True, None, "\n\nGenerate an ending."),
+        (False, "happy", "\n\nGenerate a happy continuation."),
+        (True, "happy", "\n\nGenerate a happy ending."),
     ]
 
     @parameterized.expand(test_generate_narrative_cases)
@@ -31,6 +31,7 @@ class TextGeneratorTest(TestCase):
         self.mock_model.complete.return_value = self.sample_response
         paragraph = self.generator.generate_narrative(self.sample_text, 
                 is_ending=is_ending, descriptor=descriptor)
+        extra_text += "\n\nResult: "
         self.mock_model.complete.assert_called_once_with(self.sample_text + extra_text)
         expected = self.sample_response + (" The end." if is_ending else "")
         self.assertEqual(expected, paragraph)
