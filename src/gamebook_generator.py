@@ -14,7 +14,15 @@ class GamebookGenerator:
     def _paragraphs_to_prompt(self, paragraph_list: str):
         return " ".join(paragraph_list)
 
-    def generate_narrative_from_action(self, graph: GamebookGraph, from_node_id: int, is_ending: bool=False, descriptor: str=None) -> None:
+    def generate_narrative_from_action(self, 
+        graph: GamebookGraph, 
+        from_node_id: int, 
+        is_ending: bool=False, 
+        descriptor: str=None,
+        details: str=None,
+        style: str=None
+    ) -> None:
+
         if graph.is_narrative(from_node_id):
             raise TypeError
 
@@ -30,6 +38,8 @@ class GamebookGenerator:
             prompt, 
             is_ending=is_ending,
             descriptor=descriptor,
+            details=details,
+            style=style
         )
 
         graph.make_narrative_node(
@@ -65,26 +75,6 @@ class GamebookGenerator:
             data= generated_narrative,
             is_ending= False
         )
-        graph = GamebookGraph([root])
-
-        self.generate_actions_from_narrative(graph, 0)
-
-        return graph
-
-    # TODO: Remove this once the front end is changed
-    def generate_start_from_genre(self, genre_prompt) -> GamebookGraph:
-        generated_narrative = self.text_generator.generate_narrative(
-            genre_prompt
-        )
-
-        generated_narrative = generated_narrative.replace("\n", "") + "\n"
-
-        root = NarrativeNodeData(
-            node_id= 0,
-            data= generated_narrative,
-            is_ending= False
-        )
-
         graph = GamebookGraph([root])
 
         self.generate_actions_from_narrative(graph, 0)

@@ -35,14 +35,26 @@ class TextGenerator:
                 return actions
         return actions
 
-    def generate_narrative(self, full_text: str, is_ending: bool=False,
-            descriptor: str=None) -> str:
+    def generate_narrative(self, 
+        full_text: str, 
+        is_ending: bool=False,
+        descriptor: str=None,
+        details: str=None,
+        style: str=None
+    ) -> str:
         prompt = full_text
 
         if descriptor is not None:
-            prompt += f"\n\nGenerate a {descriptor} {'ending' if is_ending else 'continuation'}: "
+            prompt += f"\n\nGenerate a {descriptor} {'ending' if is_ending else 'continuation'}."
         elif is_ending:
-            prompt += "\n\nGenerate an ending: "
+            prompt += "\n\nGenerate an ending."
+
+        if details is not None:
+            prompt += f"\n\nImportant details: {details}"
+        if style is not None:
+            prompt += f"\n\nWriting style: {style}"
+
+        prompt += "\n\nResult: "
 
         response = self.model.complete(prompt)
 
