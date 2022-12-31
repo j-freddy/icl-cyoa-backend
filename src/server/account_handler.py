@@ -1,19 +1,13 @@
 import json
-import os
 import uuid
 
 import bson
-import motor
 import tornado
 import tornado.web
 import tornado.websocket
 from pymongo import ReturnDocument
 
-from src.config import get_db_url, get_app_url
-from src.models.gpt3 import GPT3Model
-from src.gamebook_generator import GamebookGenerator
-from src.text_generator import TextGenerator
-from src.graph import GamebookGraph
+from src.config import get_app_url
 
 
 class WebBaseHandler(tornado.web.RequestHandler):  # noqa
@@ -159,6 +153,12 @@ class UserStoriesHandler(AuthBaseHandler):  # noqa
     def get(self):
         ...
 
+    def get_total_sections(self, story):
+        # Each section has 1 narrative node so we count number of narrative
+        # nodes
+        return len([node for node in story["story"]["nodes"]
+            if node["type"] == "narrative"])
+
     async def post(self):
         email = await self.get_email_from_session()
         if email is None:
@@ -184,17 +184,27 @@ class UserStoriesHandler(AuthBaseHandler):  # noqa
             # this is because you can't use an object of type MotorCursor in an 'await' expression, so you have to
             # iterate asynchronously.
             temp_story_list = []
+
             async for story in stories:
                 temp_story_list.append(story)
-            # TODO: remove this later, for debugging only
-            #  TODO: make this cleaner
+
             story_list = []
+
             for story in temp_story_list:
                 firstParagraph = "ATTENTION: First paragraph of story not yet generated."
-                totalSections = len(story["story"]["nodes"])
+
+                totalSections = self.get_total_sections(story);
+                
                 if story["story"]["nodes"]:
                     firstParagraph = story["story"]["nodes"][0]["data"]
-                story_list.append({"name": story["name"], "storyId": story["_id"], "firstParagraph": firstParagraph, "totalSections": totalSections})
+
+                story_list.append({
+                    "name": story["name"],
+                    "storyId": story["_id"],
+                    "firstParagraph": firstParagraph,
+                    "totalSections": totalSections
+                })
+
             self.write(json.dumps({"stories": story_list}))
 
         elif req_type == "saveName":
