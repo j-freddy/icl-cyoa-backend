@@ -66,6 +66,11 @@ class GenerateHandler(AuthBaseHandler):  # noqa
             node_to_expand = data["nodeToExpand"]
             generator.generate_actions_from_narrative(graph, node_to_expand)
 
+        elif req_type == "addAction":
+            node_to_expand = data["nodeToExpand"]
+            num_new_actions = data["numNewActions"]
+            generator.add_actions(graph, node_to_expand, num_new_actions=num_new_actions)
+
         elif req_type == "generateNarrative":
             node_to_expand = data["nodeToExpand"]
             is_ending = data["isEnding"]

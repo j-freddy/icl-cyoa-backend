@@ -1,5 +1,6 @@
 from src.models.gpt3 import GPT3Model
 from typing import List, Tuple
+import json
 
 class TextGenerator:
     """Class for text manipulation and generation using a model"""
@@ -9,30 +10,44 @@ class TextGenerator:
     
     @staticmethod
     def option_prompt(num_options: int) -> str:
-        return f"You have {num_options} options:"
+        return f'Generate {num_options} different choices for action in ' +\
+            'gamebook style as a json list of strings:'
 
     def action_to_second_person(self, action: str) -> str:
         instruction="Rewrite this as 'You choose ...'"
         return self.model.edit(action, instruction)
 
-    def generate_actions(self, full_text: str, num_options=2) -> List[str]:
-        prompt = full_text + " " + self.option_prompt(num_options)
+    def generate_actions(self, full_text: str, num_actions=2) -> List[str]:
+        if num_actions <= 1:
+            prompt = full_text + \
+                '\n\nGenerate only 1 choice for action in gamebook style:'
+            return [self.model.complete(prompt).strip()]
+
+        prompt = full_text + "\n\n" + self.option_prompt(num_actions)
         generated = self.model.complete(prompt)
-        # Extract only the actions.
-        actions = []
-        count = 0
-        for line in generated.splitlines():
-            line = line.strip()
-            first_alpha = next(filter(str.isalpha, line), None)
-            # Ignore non-alphabetical content at the front
-            if first_alpha is not None:
-                line = line[line.find(first_alpha):]
-                if line[-1] != ".":
-                    line += "."
-                actions.append(line)
-                count += 1
-            if count >= num_options:
-                return actions
+        try:
+            actions = [item.strip() for item in json.loads(generated)]
+        except:
+            actions = []
+        return actions
+
+    def add_actions(self, full_text: str, existing_actions: List[str], num_new_actions=1) -> List[str]:
+        connector = "\n"
+        text_and_existing_actions = full_text + \
+            f'\n\nYou already have the following choices for action: {connector.join(existing_actions)}'
+
+        if num_new_actions <= 1:
+            prompt = text_and_existing_actions + \
+                '\n\nAdd another choice for action: '
+            return [self.model.complete(prompt).strip()]
+
+        prompt = text_and_existing_actions + \
+            f'\n\nAdd {num_new_actions} more choice for action as a json list of string: '
+        generated = self.model.complete(prompt)
+        try:
+            actions = [item.strip() for item in json.loads(generated)]
+        except:
+            actions = []
         return actions
 
     def generate_narrative(self, 

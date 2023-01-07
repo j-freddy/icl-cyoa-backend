@@ -149,3 +149,7 @@ class GamebookGraph:
             node_id = self.parent_lookup[node_id][0] if self.parent_lookup[node_id] != [] else None
 
         return list(reversed(rev_paragraphs))
+
+    def get_children(self, node_id: int) -> List[int]:
+        node = self.node_lookup[node_id]
+        return node.children_ids

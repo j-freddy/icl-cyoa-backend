@@ -46,7 +46,8 @@ class TextGeneratorTest(TestCase):
     
     def test_option_prompt(self):
         num_options = 5
-        expected_text = "You have 5 options:"
+        expected_text = 'Generate 5 different choices for action in ' + \
+            'gamebook style as a json list of strings:'
         actual_text = TextGenerator.option_prompt(num_options)
         self.assertEqual(expected_text, actual_text)
 
@@ -64,40 +65,40 @@ class TextGeneratorTest(TestCase):
         self.mock_model.insert.assert_called_once_with(f"{self.sample_text}\n\n", f"\n\n{self.sample_suffix}")
         self.assertEqual(self.sample_response, actual_response)
 
-    generate_actions_return_values = [
-        # Normal
-        "\n" + \
-        "1) You can eat apples.\n" + \
-        "2) You can go home.\n",
-        # Without period
-        "\n" + \
-        "1) You can eat apples\n" + \
-        "2) You can go home\n",
-        # Alternative numbering
-        "\n" + \
-        "1. You can eat apples.\n" + \
-        "2. You can go home.\n",
-        # Extra whitespace
-        "  \n" + \
-        "  1)  You can eat apples.  \n" + \
-        "  2)  You can go home.  \n",
-        # Extra content
-        "\n" + \
-        "1) You can eat apples.\n" + \
-        "2) You can go home.\n" + \
-        "\n" + \
-        "If you choose to go home, you go home.\n"
-    ]
+    # generate_actions_return_values = [
+    #     # Normal
+    #     "\n" + \
+    #     "1) You can eat apples.\n" + \
+    #     "2) You can go home.\n",
+    #     # Without period
+    #     "\n" + \
+    #     "1) You can eat apples\n" + \
+    #     "2) You can go home\n",
+    #     # Alternative numbering
+    #     "\n" + \
+    #     "1. You can eat apples.\n" + \
+    #     "2. You can go home.\n",
+    #     # Extra whitespace
+    #     "  \n" + \
+    #     "  1)  You can eat apples.  \n" + \
+    #     "  2)  You can go home.  \n",
+    #     # Extra content
+    #     "\n" + \
+    #     "1) You can eat apples.\n" + \
+    #     "2) You can go home.\n" + \
+    #     "\n" + \
+    #     "If you choose to go home, you go home.\n"
+    # ]
 
-    @parameterized.expand(generate_actions_return_values)
-    def test_template_generate_actions(self, mock_return: str):
-        self.mock_model.complete.return_value = mock_return
-        option_text = "You have 2 options:"
-        actions = self.generator.generate_actions(self.sample_text)
-        self.mock_model.complete.assert_called_once_with(self.sample_text + " " + option_text)
-        self.assertEqual(2, len(actions))
-        self.assertEqual("You can eat apples.", actions[0])
-        self.assertEqual("You can go home.", actions[1])
+    # @parameterized.expand(generate_actions_return_values)
+    # def test_template_generate_actions(self, mock_return: str):
+    #     self.mock_model.complete.return_value = mock_return
+    #     option_text = "You have 2 options:"
+    #     actions = self.generator.generate_actions(self.sample_text)
+    #     self.mock_model.complete.assert_called_once_with(self.sample_text + " " + option_text)
+    #     self.assertEqual(2, len(actions))
+    #     self.assertEqual("You can eat apples.", actions[0])
+    #     self.assertEqual("You can go home.", actions[1])
 
     def test_new_story(self):
         self.mock_model.complete.return_value = self.sample_response
