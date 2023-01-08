@@ -1,9 +1,16 @@
 import json
+from src.constants import NUM_JSON_PARSE_ATTEMPTS
 
 from src.models.gpt3 import GPT3Model
 from typing import List, Tuple
 import json
 
+
+class TextGeneratorParseError(Exception):
+    """Thrown when a TextGenerator instance fails to parse the text provided by
+    its model"""
+
+    pass
 
 class TextGenerator:
     """Class for text manipulation and generation using a model"""
@@ -28,11 +35,15 @@ class TextGenerator:
 
         prompt = full_text + "\n\n" + self.option_prompt(num_actions)
         generated = self.model.complete(prompt)
-        try:
-            actions = [item.strip() for item in json.loads(generated)]
-        except:
-            actions = []
-        return actions
+
+        # try to parse a limited number of times and then raise an Exception
+        for _ in range(NUM_JSON_PARSE_ATTEMPTS):
+            try:
+                return [item.strip() for item in json.loads(generated)]
+            except json.decoder.JSONDecodeError:
+                pass
+
+        raise TextGeneratorParseError
 
     def add_actions(self, full_text: str, existing_actions: List[str], num_new_actions=1) -> List[str]:
         connector = "\n"
