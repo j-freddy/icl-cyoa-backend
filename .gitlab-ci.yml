@@ -19,7 +19,7 @@ run-tests:
     - virtualenv venv
     - source venv/bin/activate
     - pip install -r requirements.txt
-    - python -m unittest
+    - pytest tests/ -s
 
 deploy-int-stable:
   image: ruby:3.1.2-bullseye

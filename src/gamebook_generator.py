@@ -1,8 +1,22 @@
 """Module for the gamebook generator.
 """
 
+import math
+import random
+from typing import List
+
+from src.analyser import is_duplicate
 from src.text_generator import TextGenerator
-from src.graph import GamebookGraph, NarrativeNodeData
+from src.graph import GamebookGraph, NarrativeNodeData, ActionNodeData
+
+
+class GenerationProgressFeedback:
+    def send_generation_update(
+        self,
+        num_nodes_generated: int,
+        percentage: float,
+    ):
+        pass
 
 
 class GamebookGenerator:
@@ -24,7 +38,7 @@ class GamebookGenerator:
         descriptor: str=None,
         details: str=None,
         style: str=None
-    ) -> None:
+    ) -> int:
 
         if graph.is_narrative(from_node_id):
             raise TypeError
@@ -45,7 +59,7 @@ class GamebookGenerator:
             style=style
         )
 
-        graph.make_narrative_node(
+        return graph.make_narrative_node(
             parent_id=from_node_id, narrative=generated_narrative, is_ending=is_ending)
 
 
@@ -60,9 +74,13 @@ class GamebookGenerator:
         paragraph_list = graph.get_paragraph_list(from_node_id)
         previous_text = self._paragraphs_to_prompt(paragraph_list)
 
+        actions_ids = []
+
         generated_actions = self.text_generator.generate_actions(previous_text, num_actions)
         for generated_action in generated_actions:
-            graph.make_action_node(parent_id=from_node_id, action=generated_action)
+            actions_ids.append(graph.make_action_node(parent_id=from_node_id, action=generated_action))
+        
+        return actions_ids
 
     
     def add_actions(self, graph: GamebookGraph, from_node_id: int, num_new_actions: int=1) -> None:
@@ -97,6 +115,7 @@ class GamebookGenerator:
         bridge_node_id = graph.make_narrative_node(parent_id=from_node_id, narrative=bridge)
         
         graph.connect_nodes(bridge_node_id, to_node_id)
+
     
 
     def generate_initial_story(self, initial_story_prompt) -> GamebookGraph:
@@ -111,5 +130,93 @@ class GamebookGenerator:
         graph = GamebookGraph([root])
 
         self.generate_actions_from_narrative(graph, 0)
+
+        return graph
+
+
+    def generate_many(
+        self,
+        graph: GamebookGraph,
+        from_node_id: int,
+        max_depth: int,
+        progress_feedback: GenerationProgressFeedback,
+        ending_chance_per_node: float=0.25
+    ):
+        # Add a narrative node if current node is an action node
+        if not graph.is_narrative(from_node_id):
+            from_node_id = self.generate_narrative_from_action(
+                graph,
+                from_node_id
+            )
+
+        # Current node is always now narrative node
+        assert graph.is_narrative(from_node_id)
+
+        def find_exp_num_nodes(depth):
+            if depth == 0:
+                return 0
+
+            val_if_end = 1
+            val_if_no_end = 2+find_exp_num_nodes(depth-1)
+
+            return ending_chance_per_node*val_if_end + 2*(1-ending_chance_per_node)*val_if_no_end
+
+        exp_num_nodes = 1+find_exp_num_nodes(max_depth)
+
+        num_nodes_generated = [0]
+
+        curr_ids = [from_node_id]
+
+        def update_progress():
+            # Update progress
+            percentage = min(100, 100 * num_nodes_generated[0] / exp_num_nodes)
+            progress_feedback.send_generation_update(graph, num_nodes_generated[0], percentage)
+
+        # Repeat @max_depth times
+        for i in range(max_depth):
+            new_ids = []
+
+            # Generate continuation per narrative node in current depth
+            for curr_id in curr_ids:
+                # Do not generate continuation on ending
+                last_paragraph_text = graph.get_data(curr_id)
+                story_ended = self.text_generator.has_story_ended(last_paragraph_text)
+
+                if graph.is_ending(curr_id) or story_ended:
+                    continue
+
+                # TODO: use the is_duplicate from analyser.py to check if the duplication has occurred and end
+                # Generate actions per narrative node
+                actions_ids = self.generate_actions_from_narrative(
+                    graph,
+                    curr_id
+                )
+                num_nodes_generated[0] += len(actions_ids)
+                update_progress()
+
+                # Generate narrative node per generated action
+                for action_id in actions_ids:
+                    actions = graph.get_actions_list(action_id)
+                    duplicates = [is_duplicate(x, y) for x in actions for y in actions if x != y]
+                    if any(duplicates):
+                        node_id = self.generate_narrative_from_action(
+                            graph,
+                            action_id,
+                            is_ending=True
+                        )
+                        continue
+                    to_end = random.random() < ending_chance_per_node
+
+                    node_id = self.generate_narrative_from_action(
+                        graph,
+                        action_id,
+                        is_ending=to_end
+                    )
+                    num_nodes_generated[0] += 1
+                    new_ids.append(node_id)
+                    update_progress()
+            
+            # Next batch of narrative nodes
+            curr_ids = new_ids
 
         return graph

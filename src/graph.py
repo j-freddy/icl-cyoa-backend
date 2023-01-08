@@ -128,10 +128,18 @@ class GamebookGraph:
     def is_narrative(self, node_id):
         node = self.node_lookup[node_id]
         return node.type == "narrative"
-        # match node:
-        #     case NarrativeNodeData():
-        #         return True
-        # return False
+
+    def is_action(self, node_id):
+        node = self.node_lookup[node_id]
+        return node.type == "action"
+
+    def is_ending(self, node_id):
+        node = self.node_lookup[node_id]
+
+        if node.type != "narrative":
+            return False
+
+        return node.is_ending
     
     def get_paragraph_list(self, end_node_id):
         """Generates a list of paragraph from the root node to end node
@@ -150,6 +158,19 @@ class GamebookGraph:
 
         return list(reversed(rev_paragraphs))
 
+    def get_actions_list(self, end_node_id):
+        actions = []
+
+        node_id = end_node_id
+
+        while node_id is not None:
+            node = self.node_lookup[node_id]
+            if self.is_action(node_id) and node.data is not None:
+                actions.append(node.data)
+            node_id = self.parent_lookup[node_id][0] if self.parent_lookup[node_id] != [] else None
+
+        return actions
+        
     def get_children(self, node_id: int) -> List[int]:
         node = self.node_lookup[node_id]
         return node.children_ids
