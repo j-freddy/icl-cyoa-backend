@@ -71,7 +71,6 @@ class LoginHandler(AuthBaseHandler):  # noqa
         credentials = json.loads(body)
 
         session_id: str = str(uuid.uuid4())
-        # TODO: remove code duplication
         find_user = await self.settings["db"]["login_credentials"].find_one_and_update(
             {
                 "email": credentials["email"],
@@ -88,7 +87,8 @@ class LoginHandler(AuthBaseHandler):  # noqa
         else:
             print("no matching credentials!")
             self.set_status(401)
-        api_key = find_user["api_key"]
+        # TODO: Have to add a safety check for accessing this field
+        api_key = find_user.get("api_key")
         self.write(json.dumps({"apiKey": api_key}))
 
 
@@ -240,6 +240,7 @@ class UserStoriesHandler(AuthBaseHandler):  # noqa
                 self.set_status(403)
         
         elif req_type == "deleteStoryFromId":
+            story_id = body["storyId"]
             story = await self.settings["db"]["stories"].find_one(
                 {"_id": story_id}, {"_id": 0, "email": 0}
             )

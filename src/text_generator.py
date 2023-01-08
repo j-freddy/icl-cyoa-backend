@@ -1,20 +1,23 @@
+import json
+
 from src.models.gpt3 import GPT3Model
 from typing import List, Tuple
 import json
+
 
 class TextGenerator:
     """Class for text manipulation and generation using a model"""
 
     def __init__(self, model: GPT3Model) -> None:
         self.model = model
-    
+
     @staticmethod
     def option_prompt(num_options: int) -> str:
         return f'Generate {num_options} different choices for action in ' +\
             'gamebook style as a json list of strings:'
 
     def action_to_second_person(self, action: str) -> str:
-        instruction="Rewrite this as 'You choose ...'"
+        instruction = "Rewrite this as 'You choose ...'"
         return self.model.edit(action, instruction)
 
     def generate_actions(self, full_text: str, num_actions=2) -> List[str]:
@@ -78,14 +81,23 @@ class TextGenerator:
 
         return response
 
-    def summarise(self, content: str) -> str:
-        instruction = "Summarize the story in 2nd person:"
+    def summarise(self, content: str, min_length: int = 600) -> str:
+        if len(content) < min_length:
+            return content
+
+        instruction = "Summarise this story in detail as a JSON with all the events (in form {event1: ..., " \
+                      "event2: ...}) and " \
+                      "final state:"
         prompt = f"{content}\n\n{instruction}"
         return self.model.complete(prompt)
 
     def bridge_content(self, from_: str, to: str) -> str:
         return self.model.insert(f"{from_}\n\n", f"\n\n{to}")
 
+    def has_story_ended(self, full_text: str) -> bool:
+        prompt = "Did the story end yet (Yes | No)?"
+        return self.model.complete(prompt).strip() == "Yes"
+        
     def new_story(self, initial_values: List[Tuple[str, str]]) -> str:
         description = "; ".join([f"{attribute}: \"{content}\"" for
                 (attribute, content) in initial_values])
