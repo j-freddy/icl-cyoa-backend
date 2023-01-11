@@ -92,6 +92,14 @@ class LoginHandler(AuthBaseHandler):  # noqa
         self.write(json.dumps({"apiKey": api_key}))
 
 
+class LogoutHandler(AuthBaseHandler):  # noqa
+    """Http handler to handle user authentication and profile databases fetching"""
+
+    async def get(self):
+        print("clear")
+        self.clear_cookie("cyoa_session")
+
+
 class SignupHandler(AuthBaseHandler):  # noqa
     async def post(self):
         body = self.request.body

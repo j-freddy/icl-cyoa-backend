@@ -86,7 +86,7 @@ class GPT3Model:
 
     def _api_key_generator(self):
         while True:
-            if not self.api_key or self.rate_limited:
+            if self.api_key is None or self.rate_limited:
                 yield self.round_robin_scheduler.get_api_key()
 
             yield self.api_key
