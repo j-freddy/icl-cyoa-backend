@@ -37,7 +37,12 @@ class GenerateHandler(AuthBaseHandler, GenerationProgressFeedback):  # noqa
         user = await self.settings["db"]["login_credentials"].find_one({
             "email": email,
         })
-        self.api_key = user["api_key"]
+        if user is None:
+            self.close()
+        else:
+            self.api_key = user.get("api_key", None)
+            if self.api_key == "":
+                self.api_key = None
 
     def on_message(self, json_msg):
         """
