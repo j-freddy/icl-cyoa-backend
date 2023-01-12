@@ -96,15 +96,16 @@ class LogoutHandler(AuthBaseHandler):  # noqa
     """Http handler to handle user authentication and profile databases fetching"""
 
     async def get(self):
-        print("clear")
         sess_id = self.get_secure_cookie("cyoa_session")
-        await self.settings["db"]["login_credentials"].find_one_and_update(
+        user = await self.settings["db"]["login_credentials"].find_one_and_update(
             {
-                "session_id": sess_id,
+                "session_id": sess_id.decode(),
             },
             {"$set": {"session_id": None}},
             return_document=ReturnDocument.AFTER,
         )
+        if user:
+            print("deleted sess id")
         self.clear_cookie("cyoa_session")
 
 
