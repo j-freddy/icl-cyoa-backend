@@ -73,7 +73,6 @@ class GPT3Model:
             frequency_penalty = 2) -> None:
 
         self.api_key = api_key
-        self.api_key_generator = self._api_key_generator()
         self.rate_limited = False
 
         self.round_robin_scheduler = APIKeyRoundRobinSelector()
@@ -83,13 +82,6 @@ class GPT3Model:
         self.presence_penalty = presence_penalty
         self.frequency_penalty = frequency_penalty
 
-
-    def _api_key_generator(self):
-        while True:
-            if self.api_key is None or self.rate_limited:
-                yield self.round_robin_scheduler.get_api_key()
-
-            yield self.api_key
 
     @error_handling
     def complete(self, prompt: str) -> str:
@@ -131,4 +123,7 @@ class GPT3Model:
     
     @property
     def next_api_key(self):
-        return next(self.api_key_generator)
+        if self.api_key is None or self.rate_limited:
+            return self.round_robin_scheduler.get_api_key()
+        else:
+            return self.api_key
