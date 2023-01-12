@@ -97,7 +97,17 @@ class LogoutHandler(AuthBaseHandler):  # noqa
 
     async def get(self):
         print("clear")
+        sess_id = self.get_secure_cookie("cyoa_session")
+        await self.settings["db"]["login_credentials"].find_one_and_update(
+            {
+                "session_id": sess_id,
+            },
+            {"$set": {"session_id": None}},
+            return_document=ReturnDocument.AFTER,
+        )
         self.clear_cookie("cyoa_session")
+
+
 
 
 class SignupHandler(AuthBaseHandler):  # noqa
