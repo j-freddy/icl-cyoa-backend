@@ -6,7 +6,7 @@ import tornado.websocket
 
 from src.models.gpt3 import GPT3Model, OpenAIRateLimitError, OpenAIUnavailableError
 from src.gamebook_generator import GamebookGenerator, GenerationProgressFeedback
-from src.text_generator import TextGenerator, TextGeneratorParseError
+from src.text_generator import TextGenerator, GenerationError
 from src.graph import GamebookGraph
 
 
@@ -120,7 +120,7 @@ class GenerateHandler(AuthBaseHandler, GenerationProgressFeedback):  # noqa
                 "resType": "openaiError", 
             }))
 
-        except TextGeneratorParseError:
+        except GenerationError:
             self.write_message(json.dumps({
                 "resType": "nlpParseError", 
             }))

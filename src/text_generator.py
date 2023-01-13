@@ -1,12 +1,12 @@
 import json
-from src.constants import NUM_JSON_PARSE_ATTEMPTS
+from src.constants import NUM_GENERATION_ATTEMPTS
 
 from src.models.gpt3 import GPT3Model
 from typing import List, Tuple
 import json
 
 
-class TextGeneratorParseError(Exception):
+class GenerationError(Exception):
     """Thrown when a TextGenerator instance fails to parse the text provided by
     its model"""
 
@@ -37,13 +37,13 @@ class TextGenerator:
         generated = self.model.complete(prompt)
 
         # try to parse a limited number of times and then raise an Exception
-        for _ in range(NUM_JSON_PARSE_ATTEMPTS):
+        for _ in range(NUM_GENERATION_ATTEMPTS):
             try:
                 return [item.strip() for item in json.loads(generated)]
             except json.decoder.JSONDecodeError:
                 pass
 
-        raise TextGeneratorParseError
+        raise GenerationError
 
     def add_actions(self, full_text: str, existing_actions: List[str], num_new_actions=1) -> List[str]:
         connector = "\n"
@@ -103,7 +103,13 @@ class TextGenerator:
         return self.model.complete(prompt)
 
     def bridge_content(self, from_: str, to: str) -> str:
-        return self.model.insert(f"{from_}\n\n", f"\n\n{to}")
+        # try to parse a limited number of times and then raise an Exception
+        for _ in range(NUM_GENERATION_ATTEMPTS):
+            middle_content = self.model.insert(f"{from_}\n\n", f"\n\n{to}")
+            if middle_content != "":
+                return middle_content
+
+        raise GenerationError
 
     def has_story_ended(self, full_text: str) -> bool:
         prompt = "Did the story end yet (Yes | No)?"
